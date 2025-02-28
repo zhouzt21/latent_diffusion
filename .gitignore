@@ -1,0 +1,17 @@
+.DS_Store
+__pycache__
+logs
+/data
+/src
+tmp
+try*
+*.egg-info/
+/=*
+*.png
+*.jpg
+*.convex.stl
+*.mp4
+*.gif
+*.zip
+*.json
+*.ckpt
