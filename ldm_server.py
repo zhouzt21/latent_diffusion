@@ -1,9 +1,8 @@
 import json
 import os
-import time
 
 import PIL
-from PIL import Image
+
 import imageio
 from flask import Flask, jsonify, request
 import numpy as np
@@ -15,9 +14,9 @@ from ldm.util import instantiate_from_config
 
 app = Flask(__name__)
 
-stamp = "2024-04-03T12-03-36"
-logdir = os.path.join("logs", f"{stamp}_sim2sim-kl-8")
-ckpt_path = os.path.join(logdir, "checkpoints", "epoch=000007.ckpt")
+stamp = "2025-03-04T22-20-00"
+logdir = os.path.join("/home/zhouzhiting/Data/panda_data/latent_diffusion_logs", f"{stamp}_sim2sim-kl-8")
+ckpt_path = os.path.join(logdir, "checkpoints", "epoch=000013.ckpt")
 cfg_path = os.path.join(logdir, "configs", f"{stamp}-project.yaml")
 config = OmegaConf.load(cfg_path)
 
@@ -35,7 +34,9 @@ if use_fp16:
 model.cuda()
 model.eval()
 
-original_size = (480, 640)
+# original_size = (480, 640) # real
+original_size = (240, 320)  # sim
+
 out_size = (256, 256)
 crop_ratio = 0.95
 interpolation = "bicubic"
@@ -86,28 +87,26 @@ def tensor2img(tensor, transpose=True):
 
 @app.route("/ldm", methods=["GET", "POST"])
 def handle_request():
+    """"
+        process the image only.
+    """
     if request.method == "GET":
         response = {"message": "GET response"}
         return jsonify(response)
     elif request.method == "POST":
         try:
             os.makedirs("tmp", exist_ok=True)
-
             files = request.files
 
-            # t1 = time.time()
             image_list = []
             for file in files.values():
                 # image = np.fromfile(file, np.uint8)
                 # image = imageio.imread(file)
-                file.save(os.path.join("tmp", "tmp.jpg"))
-                image = imageio.imread(os.path.join("tmp", "tmp.jpg"))
+                file.save(os.path.join("tmp", "origin.jpg"))
+                image = imageio.imread(os.path.join("tmp", "origin.jpg"))
                 # image = Image.open(file)
                 # image = np.array(image)
                 image_list.append(image)
-
-            # t2 = time.time()
-            # print(t2 - t1)
 
             batch = process_data(image_list)
             N = len(image_list)
@@ -122,6 +121,8 @@ def handle_request():
             samples = logs["samples"]
             samples = tensor2img(samples)
 
+            imageio.imsave(os.path.join("tmp", f"sample.jpg"), samples[0])
+
             response = dict(
                 samples=samples.tolist()
             )
@@ -134,8 +135,8 @@ def handle_request():
 
 
 if __name__ == "__main__":
-    app.run(host="localhost", port="9966")
-    # app.run(host="0.0.0.0", port="9977")
+    # app.run(host="localhost", port="9966")
+    app.run(host="0.0.0.0", port="9977")
 
     # import requests
     # paths = ["obs.jpg"]
