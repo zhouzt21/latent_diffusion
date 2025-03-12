@@ -1,11 +1,5 @@
-import json
 import os
-import time
-
 import PIL
-from PIL import Image
-import imageio
-from flask import Flask, jsonify, request
 import numpy as np
 import torch
 import torchvision.transforms as transforms
@@ -13,6 +7,7 @@ from omegaconf import OmegaConf
 from pytorch_lightning import seed_everything
 from ldm.util import instantiate_from_config
 
+from flask import Flask, jsonify, request
 import requests
 
 app = Flask(__name__)
@@ -22,7 +17,7 @@ app = Flask(__name__)
 stamp = "2025-03-04T22-20-00"
 logdir = os.path.join("/home/zhouzhiting/Data/panda_data/latent_diffusion_logs", f"{stamp}_sim2sim-kl-8")
 # ckpt_path = os.path.join(logdir, "checkpoints", "epoch=000007.ckpt")
-ckpt_path = os.path.join(logdir, "checkpoints", "epoch=000007-v1.ckpt")
+ckpt_path = os.path.join(logdir, "checkpoints", "epoch=000013-v1.ckpt")
 cfg_path = os.path.join(logdir, "configs", f"{stamp}-project.yaml")
 config = OmegaConf.load(cfg_path)
 
@@ -106,6 +101,14 @@ def tensor2img(tensor, transpose=True):
     img = np.clip(0, 255, np.round(img)).astype(np.uint8)
     return img
 
+import sys
+sys.path.append("/home/zhouzhiting/Projects/polymetis/polymetis")
+from polymetis import CameraInterface, RobotInterface, GripperInterface
+ip_address = "101.6.103.171"
+camera_interface = CameraInterface(ip_address=ip_address) 
+robot_interface = RobotInterface(ip_address=ip_address,enforce_version=False)
+gripper_interface = GripperInterface(ip_address=ip_address)
+
 
 @app.route("/ldm_real", methods=["GET", "POST"])
 def handle_request():
@@ -116,21 +119,20 @@ def handle_request():
         try:
             os.makedirs("tmp", exist_ok=True)
 
-            # Send request to robot server
-            robot_server_url = "http://??/robot"
-            robot_response = requests.post(robot_server_url)
-            robot_response.raise_for_status()   
-            robot_data = robot_response.json()
+            pos, quat = robot_interface.get_ee_pose()
+            tcp_pose = np.concatenate([np.array(pos), np.array(quat)])
+            gripper = gripper_interface.get_state()
+            gripper_width = gripper.width
 
-            tcp_pose = robot_data["tcp_pose"]
-            gripper = robot_data["gripper_width"]
-            print("tcp_pose: ", tcp_pose.shape)
-            print("gripper: ", gripper.shape)
+            print("tcp_pose: ", tcp_pose)
+            print("gripper_width: ", gripper_width)
+            print("gripper_width: ", type(gripper_width))
 
             image_list = []
-            # just one timesteps
-            for cam in cameras: 
-                image_list.append(robot_data[f"{cam}-rgb"])
+            # now only support one camera(third), more cameras should init more camera_interface
+            image_data, timestamp = camera_interface.read_once()
+            print(image_data.shape)
+            image_list.append(image_data)
 
             batch = process_data(image_list)
             N = len(image_list)
@@ -147,8 +149,8 @@ def handle_request():
 
             response = dict(
                 samples=samples.tolist(), # (M, h, w, c), uint8, np
-                tcp_pose=tcp_pose,
-                gripper_width=gripper,
+                tcp_pose=tcp_pose.tolist(),
+                gripper_width=gripper_width,
             )
 
             return jsonify(response)
