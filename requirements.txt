@@ -1,0 +1,17 @@
+# additional requirements for latent diffusion models (in polymetis-local)
+pytorch-lightning==1.4.2
+torchmetrics==0.5.0
+torch-fidelity==0.3.0
+albumentations==0.4.3
+pudb==2019.2
+imageio==2.9.0
+imageio-ffmpeg==0.4.2
+omegaconf==2.1.1
+test-tube>=0.7.5
+streamlit>=0.73.1
+einops==0.3.0
+torch-fidelity==0.3.0
+transformers==4.3.1
+
+# downgrade protobuf from 4.25.6(imitation-algos) to 3.20.0 to match the version 
+# and pip install taming-transformers(from git manually) 

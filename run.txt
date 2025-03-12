@@ -1,0 +1,12 @@
+## 0306
+CUDA_VISIBLE_DEVICES=0 python main.py -b /home/zhouzhiting/Projects/latent-diffusion/configs/latent-diffusion/sim2sim-kl-8.yaml \
+      -t -l /home/zhouzhiting/Data/panda_data/latent_diffusion_logs --scale_lr False --gpus 0  \
+      --resume /home/zhouzhiting/Data/panda_data/latent_diffusion_logs/2025-03-04T22-20-00_sim2sim-kl-8
+
+# 0309
+CUDA_VISIBLE_DEVICES=0 python main.py -b /home/zhouzhiting/Projects/latent-diffusion/configs/latent-diffusion/sim2sim-kl-8.yaml \
+      -t -l /home/zhouzhiting/Data/panda_data/latent_diffusion_logs --scale_lr False --gpus 1  \
+      --resume /home/zhouzhiting/Data/panda_data/latent_diffusion_logs/2025-03-04T22-20-00_sim2sim-kl-8/checkpoints/epoch=000002.ckpt
+
+
+# python eval.py --resume "/home/zhouzhiting/Data/panda_data/latent_diffusion_logs/2025-03-04T22-20-00_sim2sim-kl-8/checkpoints/epoch=000013.ckpt"
