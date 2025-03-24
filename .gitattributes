@@ -1,5 +1,2 @@
-*.py linguist-language=python;
-*.yaml linguist-language=yaml;
-*.txt linguist-language=txt;
-*.sh linguist-language=shell;
-*.ipynb linguist-detectable=false
+*.py linguist-language=Python linguist-generated=false
+*.ipynb linguist-documentation=false  linguist-generated=false
