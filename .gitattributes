@@ -2,3 +2,4 @@
 *.yaml linguist-language=yaml;
 *.txt linguist-language=txt;
 *.sh linguist-language=shell;
+*.ipynb linguist-detectable=false
