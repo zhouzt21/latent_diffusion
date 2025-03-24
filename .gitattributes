@@ -1,3 +1,4 @@
 *.py linguist-language=Python linguist-generated=false
 *.ipynb linguist-documentation=false  linguist-generated=false
 *.yaml linguist-documentation=false  linguist-generated=false
+*.md linguist-documentation=false  linguist-generated=false
