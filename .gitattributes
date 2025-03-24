@@ -1,0 +1,3 @@
+*.py linguist-language=python
+*.yaml linguist-language=yaml
+*.txt linguist-language=txt
